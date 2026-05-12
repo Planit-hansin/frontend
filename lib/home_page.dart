@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'ai_chat_page.dart';
+import 'calendar_page.dart';
+import 'setting_page.dart';
+import 'todo_page.dart';
 
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -13,47 +15,70 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   // 나중에 가입 시 입력받은 이름을 저장할 변수입니다.
   final String userName = "민조";
+  int _selectedIndex = 0;
   bool isExerciseDone = false;
+
 
   @override
   Widget build(BuildContext context) {
+    Widget currentBody;
+    switch (_selectedIndex) {
+      case 0:
+        currentBody = _buildHomeContent();
+        break;
+      case 1:
+        currentBody = const CalendarPage();
+        break;
+      case 2:
+        currentBody = const TodoPage();
+        break;
+      case 3:
+        currentBody = const SettingPage();
+        break;
+      default:
+        currentBody = _buildHomeContent();
+    }
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              _buildWeatherCard(),
-              const SizedBox(height: 30),
-              _buildHorizontalCalendar(),
-              const SizedBox(height: 30),
-              _buildScheduleBriefing(),
-              const SizedBox(height: 30),
-              _buildAIRoutineAnalysis(),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: _buildBottomNav(),
-      floatingActionButton: FloatingActionButton.large(
-        onPressed: () {
-          // 버튼 클릭 시 채팅 화면으로 이동
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AIChatPage()),
-          );
-        },
+        backgroundColor: Colors.white,
+        body: currentBody,
+
+        bottomNavigationBar: _buildBottomNav(),
+        floatingActionButton: FloatingActionButton.large(
+          onPressed: () {
+            // 버튼 클릭 시 채팅 화면으로 이동
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AIChatPage()),
+            );
+          },
           backgroundColor: Colors.grey[300],
           shape: const CircleBorder(),
-          child: const Text("AI", style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold)),
-          )
+          child: const Text("AI", style: TextStyle(
+              color: Colors.black54, fontWeight: FontWeight.bold)),
+        )
     );
   }
 
-
+  Widget _buildHomeContent() {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            _buildWeatherCard(),
+            const SizedBox(height: 30),
+            _buildHorizontalCalendar(),
+            const SizedBox(height: 30),
+            _buildScheduleBriefing(),
+            const SizedBox(height: 30),
+            _buildAIRoutineAnalysis(),
+          ],
+        ),
+      ),
+    );
+  }
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.only(top: 10.0, bottom: 5.0),
@@ -69,6 +94,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
   // 1. 오늘의 날씨 카드
   Widget _buildWeatherCard() {
     DateTime now = DateTime.now();
@@ -84,19 +110,35 @@ class _HomePageState extends State<HomePage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("오늘의 날씨", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              const Text("오늘의 날씨",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               // _buildWeatherCard 내부의 날짜 텍스트 부분
               Text(
-                "${now.day} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][now.month - 1]} ${now.year}",
+                "${now.day} ${[
+                  'Jan',
+                  'Feb',
+                  'Mar',
+                  'Apr',
+                  'May',
+                  'Jun',
+                  'Jul',
+                  'Aug',
+                  'Sep',
+                  'Oct',
+                  'Nov',
+                  'Dec'
+                ][now.month - 1]} ${now.year}",
                 style: TextStyle(color: Colors.grey[400], fontSize: 12),
               ),
               const SizedBox(height: 5),
-              const Text("Cloudy", style: TextStyle(fontWeight: FontWeight.w500)),
+              const Text(
+                  "Cloudy", style: TextStyle(fontWeight: FontWeight.w500)),
             ],
           ),
           Row(
             children: [
-              const Text("18°C", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+              const Text("18°C",
+                  style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
               const SizedBox(width: 10),
               Icon(Icons.cloud, size: 60, color: Colors.grey[300]),
             ],
@@ -168,9 +210,11 @@ class _HomePageState extends State<HomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("일정 브리핑", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const Text("일정 브리핑",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: 15),
-        const Text("오늘은 일정이 없습니다.\n추천 일정을 등록하시겠어요?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        const Text("오늘은 일정이 없습니다.\n추천 일정을 등록하시겠어요?",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         const SizedBox(height: 20),
         Container(
           padding: const EdgeInsets.all(15),
@@ -182,7 +226,8 @@ class _HomePageState extends State<HomePage> {
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(color: Colors.white24,
+                    borderRadius: BorderRadius.circular(10)),
                 child: const Icon(Icons.calendar_today, color: Colors.white),
               ),
               const SizedBox(width: 15),
@@ -190,17 +235,21 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("운동", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    Text("19:00 - 20:00", style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text("운동", style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
+                    Text("19:00 - 20:00",
+                        style: TextStyle(color: Colors.white70, fontSize: 12)),
                   ],
                 ),
               ),
               // 2. 체크박스 역할을 하는 아이콘 버튼 추가
               GestureDetector(
+                behavior: HitTestBehavior.opaque, // 터치 영역 확장
                 onTap: () {
                   setState(() {
-                    isExerciseDone = !isExerciseDone; // 클릭 시 상태 반전
+                    isExerciseDone = !isExerciseDone;
                   });
+                  // 팁: 여기서 DB.save(isExerciseDone) 같은 함수를 실행하면 학습 데이터가 쌓입니다!
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
@@ -213,7 +262,7 @@ class _HomePageState extends State<HomePage> {
                   child: Icon(
                     Icons.check,
                     size: 10,
-                    color: isExerciseDone ? Colors.white : Colors.transparent, // 체크 안 됐을 땐 투명하게
+                    color: isExerciseDone ? Colors.white : Colors.transparent,
                   ),
                 ),
               ),
@@ -225,6 +274,7 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
+
   // 4. AI 루틴 분석
   // 상단에 분석 결과를 담을 변수 선언 (나중에 API나 DB에서 받아온 값으로 교체)
   final String weeklyAnalysis = "일정 수행률 75% | 오전 집중도 높음";
@@ -234,7 +284,8 @@ class _HomePageState extends State<HomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("AI 루틴 분석", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const Text("AI 루틴 분석",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: 15),
         Container(
           width: double.infinity,
@@ -250,7 +301,8 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Text("📊", style: TextStyle(fontSize: 18)),
                   SizedBox(width: 8),
-                  Text("이번 주 분석", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  Text("이번 주 분석", style: TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 15)),
                 ],
               ),
               const SizedBox(height: 8),
@@ -264,7 +316,8 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Text("💡", style: TextStyle(fontSize: 18)),
                   SizedBox(width: 8),
-                  Text("AI 추천", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  Text("AI 추천", style: TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 15)),
                 ],
               ),
               const SizedBox(height: 8),
@@ -283,21 +336,56 @@ class _HomePageState extends State<HomePage> {
 
   // 하단 네비게이션 바
   Widget _buildBottomNav() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 0, 100, 20),
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF1F3F5),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Icon(Icons.home_filled, color: Colors.blueAccent),
-          Icon(Icons.calendar_month_outlined, color: Colors.black54),
-          Icon(Icons.list_alt, color: Colors.black54),
-          Icon(Icons.settings_outlined, color: Colors.black54),
-        ],
+    return Padding(
+      // 좌우 여백을 동일하게 20으로 맞춰서 균형을 잡았습니다.
+      padding: const EdgeInsets.only(bottom: 20.0, left: 20, right: 20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F3F5),
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          // 4개의 아이콘이 일정한 간격으로 배치됩니다.
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // 홈 버튼
+            IconButton(
+              icon: Icon(Icons.home_filled,
+                  color: _selectedIndex == 0 ? Colors.blueAccent : Colors
+                      .black54),
+              onPressed: () => setState(() => _selectedIndex = 0),
+            ),
+            // 달력 버튼
+            IconButton(
+              icon: Icon(Icons.calendar_month_outlined,
+                  color: _selectedIndex == 1 ? Colors.blueAccent : Colors
+                      .black54),
+              onPressed: () => setState(() => _selectedIndex = 1),
+            ),
+            // 리스트 버튼
+            IconButton(
+              icon: Icon(Icons.list_alt,
+                  color: _selectedIndex == 2 ? Colors.blueAccent : Colors
+                      .black54),
+              onPressed: () => setState(() => _selectedIndex = 2),
+            ),
+            // 설정 버튼
+            IconButton(
+              icon: Icon(Icons.settings_outlined,
+                  color: _selectedIndex == 3 ? Colors.blueAccent : Colors
+                      .black54),
+              onPressed: () => setState(() => _selectedIndex = 3),
+            ),
+          ],
+        ),
       ),
     );
   }
