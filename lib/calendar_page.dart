@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_schedule_page.dart';
+import 'holiday_service.dart';
+
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -11,11 +13,31 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   DateTime _selectedDay = DateTime.now();
 
+  // ⭐️ 아래 2줄 추가
+  final HolidayService _holidayService = HolidayService();
+  Map<String, String> _currentMonthHolidays = {}; // 서버에서 받아온 공휴일 '일' 리스트
+
   // 테스트용 일정 데이터
   final Map<String, List<String>> _schedules = {
     "2026-05-12": ["캡스톤 디자인 회의", "Flutter 코드 수정"],
   };
+// ⭐️ 공휴일 데이터를 비동기로 가져오는 함수 추가
+  Future<void> _loadHolidays(int year, int month) async {
+    final holidays = await _holidayService.fetchHolidays(
+      year.toString(),
+      month.toString(),
+    );
+    setState(() {
+      _currentMonthHolidays = holidays; // 예: ['05', '25']
+    });
+  }
 
+  @override
+  void initState() {
+    super.initState();
+    // ⭐️ 초기화 시 현재 날짜 기준 공휴일 로드
+    _loadHolidays(_selectedDay.year, _selectedDay.month);
+  }
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -25,6 +47,7 @@ class _CalendarPageState extends State<CalendarPage> {
     );
     if (picked != null && picked != _selectedDay) {
       setState(() => _selectedDay = picked);
+      _loadHolidays(picked.year, picked.month);
     }
   }
 
@@ -70,7 +93,13 @@ class _CalendarPageState extends State<CalendarPage> {
                 if (index < firstWeekday) return Container(decoration: _boxDecor());
 
                 int day = index - firstWeekday + 1;
-                bool isWeekend = (index % 7 == 0 || index % 7 == 6);
+
+                String dayStr = day.toString().padLeft(2, '0');
+                String? holidayName = _currentMonthHolidays[dayStr];
+                bool isHoliday = holidayName != null;
+
+                bool isRedDay = (index % 7 == 0 || isHoliday);
+                bool isSaturday = (index % 7 == 6);
                 bool isSelected = (day == _selectedDay.day && month == _selectedDay.month && year == _selectedDay.year);
 
                 String loopDateKey = "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
@@ -99,10 +128,35 @@ class _CalendarPageState extends State<CalendarPage> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                              color: isWeekend ? Colors.red : Colors.black,
+                              color: isRedDay
+                                  ? Colors.red
+                                  : (isSaturday ? Colors.blue : Colors.black),
                             ),
                           ),
                         ),
+
+                        if (isHoliday)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFCE8E6), // 연한 빨간 배경
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                holidayName, // 예: "어린이날"
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.redAccent,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
                         if (loopSchedules.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -233,7 +287,7 @@ class _CalendarPageState extends State<CalendarPage> {
           _buildWeekdayText("Wed", Colors.black),
           _buildWeekdayText("Thu", Colors.black),
           _buildWeekdayText("Fri", Colors.black),
-          _buildWeekdayText("Sat", Colors.red),
+          _buildWeekdayText("Sat", Colors.blue),
         ],
       ),
     );
